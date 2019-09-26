@@ -15,12 +15,6 @@ class DeclarationBundlerPlugin
 	{
 		this.out = options.out ? options.out : './build/';
 		this.excludedReferences = options.excludedReferences ? options.excludedReferences : undefined;
-
-		if(!options.moduleName && !options.namespace)
-		{
-			throw new Error('Please set a moduleName if you use mode:internal. new DacoreWebpackPlugin({mode:\'internal\',[moduleName | namespace]:...})');
-		}
-        
 		this.moduleName = options.moduleName;
         this.namespace = !this.moduleName ? options.namespace : undefined;
 	}
@@ -115,9 +109,11 @@ class DeclarationBundlerPlugin
 
 	    if (this.moduleName) {
 		    return "declare module " + this.moduleName + "\n{\n" + declarations + "}";
-	    }
+	    } else if (this.namespace) {
+		  return "declare namespace " + this.namespace + "\n{\n" + declarations + "}";
+        }
         
-		return "declare namespace " + this.namespace + "\n{\n" + declarations + "}";
+        return declarations;
 	}
 
 }
