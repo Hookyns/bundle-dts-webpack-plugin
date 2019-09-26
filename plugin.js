@@ -1,13 +1,18 @@
 "use strict";
+var IMPORT_REQUIRED_REGEX = /import\s+([a-z0-9A-Z_-]+)\s*=\s*require\(/;
+var IMPORT_REGEX = /import\s+([a-z0-9A-Z_-]+|(\{.*?\}))\s+from/;
+var REEXPORT_REGEX = /export\s*\{[\s\S]*?\};/;
+var DECLARE_REGEX = /(^|\s)declare\s+/;
 var DeclarationBundlerPlugin = /** @class */ (function () {
     function DeclarationBundlerPlugin(options) {
         if (options === void 0) { options = {}; }
         this.out = options.out ? options.out : './build/';
         this.excludedReferences = options.excludedReferences ? options.excludedReferences : undefined;
-        if (!options.moduleName) {
-            throw new Error('please set a moduleName if you use mode:internal. new DacoreWebpackPlugin({mode:\'internal\',moduleName:...})');
+        if (!options.moduleName && !options.namespace) {
+            throw new Error('Please set a moduleName if you use mode:internal. new DacoreWebpackPlugin({mode:\'internal\',[moduleName | namespace]:...})');
         }
         this.moduleName = options.moduleName;
+        this.namespace = !this.moduleName ? options.namespace : undefined;
     }
     DeclarationBundlerPlugin.prototype.apply = function (compiler) {
         var _this = this;
@@ -51,8 +56,10 @@ var DeclarationBundlerPlugin = /** @class */ (function () {
                 var excludeLine = line == "";
                 //exclude export statements
                 excludeLine = excludeLine || line.indexOf("export =") !== -1;
+                //exclude re-exports
+                excludeLine = excludeLine || REEXPORT_REGEX.test(line);
                 //exclude import statements
-                excludeLine = excludeLine || (/import ([a-z0-9A-Z_-]+) = require\(/).test(line);
+                excludeLine = excludeLine || IMPORT_REQUIRED_REGEX.test(line) || IMPORT_REGEX.test(line);
                 //if defined, check for excluded references
                 if (!excludeLine && this.excludedReferences && line.indexOf("<reference") !== -1) {
                     excludeLine = this.excludedReferences.some(function (reference) { return line.indexOf(reference) !== -1; });
@@ -61,17 +68,20 @@ var DeclarationBundlerPlugin = /** @class */ (function () {
                     lines.splice(i, 1);
                 }
                 else {
-                    if (line.indexOf("declare ") !== -1) {
-                        lines[i] = line.replace("declare ", "");
-                    }
+                    //declare
+                    line = lines[i] = line.replace(DECLARE_REGEX, function (match, whiteSpace) {
+                        return whiteSpace;
+                    });
                     //add tab
                     lines[i] = "\t" + lines[i];
                 }
             }
             declarations += lines.join("\n") + "\n\n";
         }
-        var output = "declare module " + this.moduleName + "\n{\n" + declarations + "}";
-        return output;
+        if (this.moduleName) {
+            return "declare module " + this.moduleName + "\n{\n" + declarations + "}";
+        }
+        return "declare namespace " + this.namespace + "\n{\n" + declarations + "}";
     };
     return DeclarationBundlerPlugin;
 }());
