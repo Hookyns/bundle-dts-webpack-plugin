@@ -1,5 +1,5 @@
-const IMPORT_REQUIRED_REGEX = /import\s+([a-z0-9A-Z_-]+)\s*=\s*require\(/;
-const IMPORT_REGEX = /import\s+([a-z0-9A-Z_-]+|(\{.*?\}))\s+from/;
+const IMPORT_REQUIRED_REGEX = /import\s+([a-z0-9A-Z_-]+)\s*=\s*require\(["']\./;
+const IMPORT_REGEX = /import\s+([a-z0-9A-Z_-]+|(\{.*?\}))\s+from\s*["']\./;
 const REEXPORT_REGEX = /export\s*\{[\s\S]*?\};/;
 const DECLARE_REGEX = /(^|\s)declare\s+/;
 

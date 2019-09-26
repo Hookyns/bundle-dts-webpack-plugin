@@ -1,6 +1,6 @@
 "use strict";
-var IMPORT_REQUIRED_REGEX = /import\s+([a-z0-9A-Z_-]+)\s*=\s*require\(/;
-var IMPORT_REGEX = /import\s+([a-z0-9A-Z_-]+|(\{.*?\}))\s+from/;
+var IMPORT_REQUIRED_REGEX = /import\s+([a-z0-9A-Z_-]+)\s*=\s*require\(["']\./;
+var IMPORT_REGEX = /import\s+([a-z0-9A-Z_-]+|(\{.*?\}))\s+from\s*["']\./;
 var REEXPORT_REGEX = /export\s*\{[\s\S]*?\};/;
 var DECLARE_REGEX = /(^|\s)declare\s+/;
 var DeclarationBundlerPlugin = /** @class */ (function () {
